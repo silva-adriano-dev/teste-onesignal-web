@@ -28,6 +28,8 @@
 
     <div class="card">
         <h3>2. Simular Envio</h3>
+        <input type="text" id="veiculoId" placeholder="ID do Veículo (ex: CARRO_01)" value="VEICULO_01">
+        <br>
         <input type="number" id="lat" placeholder="Latitude" value="-23.5505" step="0.0001">
         <input type="number" id="lng" placeholder="Longitude" value="-46.6333" step="0.0001">
         <br>
@@ -43,31 +45,28 @@
 
     <script>
         let connection = null;
-        const URL_BASE = "https://socket.adrianosilva.dev/hubs/tracking"; // Ajuste sua porta aqui
+        const URL_BASE = "https://socket.adrianosilva.dev/hubs/tracking"; 
 
         async function conectar() {
             const grupo = document.getElementById("grupoId").value;
             if (!grupo) return alert("Digite um nome de grupo!");
 
-            // 1. Monta a URL com a QueryString ?grupo=...
-            // Note que não usamos mais o accessTokenFactory (JWT)
             connection = new signalR.HubConnectionBuilder() 
-    .withUrl(`${URL_BASE}?grupo=${grupo}`)
-    .withAutomaticReconnect()
-    .build();
+                .withUrl(`${URL_BASE}?grupo=${grupo}`)
+                .withAutomaticReconnect()
+                .build();
 
-            // 2. Escuta o evento que o servidor dispara
             connection.on("LocationReceived", (location) => {
                 const logDiv = document.getElementById("log");
                 const time = new Date().toLocaleTimeString();
-                logDiv.innerHTML += `<div>[${time}] 📍 <b>Recebido:</b> Lat ${location.latitude} | Lng ${location.longitude}</div>`;
+                // Log atualizado para mostrar também o ID recebido
+                logDiv.innerHTML += `<div>[${time}] 📍 <b>${location.id || 'Sem ID'}:</b> Lat ${location.latitude} | Lng ${location.longitude}</div>`;
                 logDiv.scrollTop = logDiv.scrollHeight;
             });
 
             try {
                 await connection.start();
                 
-                // Interface
                 document.getElementById("statusTxt").innerText = "Status: Conectado ao grupo [" + grupo + "]";
                 document.getElementById("statusTxt").className = "status-online";
                 document.getElementById("log").innerHTML = "<div> Conexão aberta. Ouvindo grupo...</div>";
@@ -84,20 +83,21 @@
         async function enviar() {
             if (!connection) return;
 
+            const id = document.getElementById("veiculoId").value; // Captura o ID do campo
             const lat = parseFloat(document.getElementById("lat").value);
             const lng = parseFloat(document.getElementById("lng").value);
 
-            // Objeto seguindo seu LocationMessageDto
+            if (!id) return alert("Por favor, insira um ID para o veículo.");
+
             const dto = {
                 latitude: lat,
                 longitude: lng,
-                id: "VEICULO_01" // ajuste conforme seu DTO
+                id: id // Usa a variável capturada do input
             };
 
             try {
-                // Chama o método SendLocation do seu Hub C#
                 await connection.invoke("SendLocation", dto);
-                console.log("Localização enviada!");
+                console.log("Localização enviada para o ID:", id);
             } catch (err) {
                 console.error("Erro no invoke:", err);
             }
