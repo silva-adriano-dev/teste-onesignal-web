@@ -43,7 +43,7 @@
 
     <script>
         let connection = null;
-        const URL_BASE = "http://localhost:5173/hubs/tracking"; // Ajuste sua porta aqui
+        const URL_BASE = "https://socket.adrianosilva.dev/hubs/tracking"; // Ajuste sua porta aqui
 
         async function conectar() {
             const grupo = document.getElementById("grupoId").value;
@@ -70,7 +70,7 @@
                 // Interface
                 document.getElementById("statusTxt").innerText = "Status: Conectado ao grupo [" + grupo + "]";
                 document.getElementById("statusTxt").className = "status-online";
-                document.getElementById("log").innerHTML = "<div>🚀 Conexão aberta. Ouvindo grupo...</div>";
+                document.getElementById("log").innerHTML = "<div> Conexão aberta. Ouvindo grupo...</div>";
                 document.getElementById("btnEnviar").disabled = false;
                 document.getElementById("btnConectar").disabled = true;
                 document.getElementById("grupoId").disabled = true;
